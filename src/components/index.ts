@@ -1,5 +1,5 @@
 import {CustomToast} from './toast';
-
 import MyText from './text';
+export {CustomToast, MyText};
 
-export { CustomToast, MyText};
+export {default as MyComboBox} from './input/MyComboBox';

@@ -12,56 +12,65 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {AuthStackParamList} from '../../navigation/types';
 import {useNavigation} from '@react-navigation/native';
 import metrics from '@app/theme/metrics';
+import {
+  FormProvider,
+  SubmitErrorHandler,
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form';
+import {useApp} from '@app/AppProvider';
+import {helper} from '@app/common';
+import {MyInput} from '@app/components/input/MyInput';
 
 type Props = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
+
+type FormUserValues = {
+  username: string;
+  code: string;
+};
 
 export const LoginScreen = () => {
   const navigation = useNavigation<Props>();
   const {signIn} = useAuth();
-
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
+  const {showLoader, hideLoader, showFlashMessage} = useApp();
+  const {...methods} = useForm<FormUserValues>({
+    mode: 'onChange',
+    defaultValues: __DEV__
+      ? {
+          username: 'ken',
+          code: '123456',
+        }
+      : {
+          username: '',
+          code: '',
+        },
   });
 
-  const [errors, setErrors] = useState({
-    username: '',
-    password: '',
-  });
+  const [formError, setError] = useState<Boolean>(false);
 
-  const [showPassword, setShowPassword] = useState(false);
-
-  const validateForm = () => {
-    let isValid = true;
-    const newErrors = {...errors};
-
-    if (!formData.username) {
-      newErrors.username = 'Tài khoản không được để trống';
-      isValid = false;
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'Mật khẩu không được để trống';
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
+  const onError: SubmitErrorHandler<FormUserValues> = (errors, e) => {
+    return console.log({errors});
   };
 
-  const handleLogin = () => {
-    if (validateForm()) {
-      // In a real app, you would make an API call here
-      signIn('dummy-token');
+  const onSubmit: SubmitHandler<FormUserValues> = async data => {
+    try {
+      showLoader('Đang tải...');
+      await helper.sleep(500);
+      hideLoader();
+      signIn('123456');
+      // navigation.navigate('Home');
+    } catch (error) {
+      hideLoader();
+    } finally {
+      showFlashMessage('top', {
+        message: 'Thành công',
+        description: 'Đăng nhập thành công',
+        type: 'success',
+      });
     }
-  };
 
-  const renderRequiredLabel = (label: string) => (
-    <View style={styles.labelContainer}>
-      <MyText style={styles.requiredStar}>*</MyText>
-      <MyText style={styles.labelText}>{label}</MyText>
-    </View>
-  );
+    console.log('data', data);
+  };
 
   return (
     <ScrollView
@@ -79,45 +88,39 @@ export const LoginScreen = () => {
         </View>
 
         <View style={styles.content}>
-          <View style={styles.formContainer}>
-            {renderRequiredLabel('Tài khoản')}
-            <TextInput
-              mode="outlined"
-              placeholder="Nhập tài khoản"
-              value={formData.username}
-              onChangeText={text => setFormData({...formData, username: text})}
-              error={!!errors.username}
-              style={styles.input}
-              outlineStyle={styles.inputOutline}
-              contentStyle={styles.inputContent}
-            />
-            <HelperText type="error" visible={!!errors.username}>
-              {errors.username}
-            </HelperText>
-
-            {renderRequiredLabel('Mật khẩu')}
-            <TextInput
-              mode="outlined"
-              placeholder="Nhập mật khẩu"
-              value={formData.password}
-              onChangeText={text => setFormData({...formData, password: text})}
-              secureTextEntry={!showPassword}
-              error={!!errors.password}
-              right={
-                <TextInput.Icon
-                  icon={showPassword ? 'eye-off' : 'eye'}
-                  onPress={() => setShowPassword(!showPassword)}
-                />
-              }
-              style={styles.input}
-              outlineStyle={styles.inputOutline}
-              contentStyle={styles.inputContent}
-            />
-            <HelperText type="error" visible={!!errors.password}>
-              {errors.password}
-            </HelperText>
-          </View>
-
+          {formError ? (
+            <View>
+              <MyText style={{color: 'red'}}>
+                There was a problem with loading the form. Please try again
+                later.
+              </MyText>
+            </View>
+          ) : (
+            <FormProvider {...methods}>
+              <MyInput
+                name="username"
+                label="Tài khoản"
+                placeholder="Nhập tài khoản"
+                keyboardType="default"
+                rules={{
+                  required: 'Tài khoản là bắt buộc!',
+                }}
+                setFormError={setError}
+                editable={true}
+              />
+              <MyInput
+                name="code"
+                label="Mật khẩu"
+                placeholder="Nhập mật khẩu"
+                keyboardType="default"
+                rules={{
+                  required: 'Mật khẩu là bắt buộc!',
+                }}
+                setFormError={setError}
+                editable={true}
+              />
+            </FormProvider>
+          )}
           <View style={styles.footer}>
             <View>
               <MyText variant="medium" fontSize={18} color="#000">
@@ -143,18 +146,9 @@ export const LoginScreen = () => {
                 },
               ]}
               labelStyle={{fontWeight: 'bold', fontSize: 16}}
-              onPress={() => navigation.navigate('Login')}>
+              onPress={methods.handleSubmit(onSubmit, onError)}>
               Đăng nhập
             </Button>
-            {/* <Button
-              mode="outlined"
-              onPress={handleLogin}
-              style={styles.loginButton}
-              buttonColor="#0088CC"
-              contentStyle={styles.loginButtonContent}
-              labelStyle={styles.loginButtonLabel}>
-              Đăng nhập
-            </Button> */}
           </View>
         </View>
       </View>

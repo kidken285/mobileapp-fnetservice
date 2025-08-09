@@ -46,7 +46,7 @@ const ControlledInput = forwardRef<RNTextInput, MyInputProps>((props, ref) => {
   return (
     <View style={styles.container}>
       {label && (
-        <MyText variant="bold" style={styles.label}>
+        <MyText variant="medium" style={styles.label}>
           {label}
           {rules !== null && rules !== undefined && (
             <MyText style={styles.errorText}> *</MyText>
