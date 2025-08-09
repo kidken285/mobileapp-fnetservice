@@ -21,6 +21,7 @@ import {
 import {useApp} from '@app/AppProvider';
 import {helper} from '@app/common';
 import {MyInput} from '@app/components/input/MyInput';
+import {useUserStore} from '@app/store/userStore';
 
 type Props = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
@@ -33,6 +34,7 @@ export const LoginScreen = () => {
   const navigation = useNavigation<Props>();
   const {signIn} = useAuth();
   const {showLoader, hideLoader, showFlashMessage} = useApp();
+  const loadUserProfile = useUserStore(s => s.loadUserProfile);
   const {...methods} = useForm<FormUserValues>({
     mode: 'onChange',
     defaultValues: __DEV__
@@ -55,9 +57,9 @@ export const LoginScreen = () => {
   const onSubmit: SubmitHandler<FormUserValues> = async data => {
     try {
       showLoader('Đang tải...');
-      await helper.sleep(500);
-      hideLoader();
       signIn('123456');
+      await loadUserProfile();
+      hideLoader();
       // navigation.navigate('Home');
     } catch (error) {
       hideLoader();

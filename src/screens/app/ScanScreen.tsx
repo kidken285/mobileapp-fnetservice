@@ -7,7 +7,6 @@ import {
   TouchableWithoutFeedback,
   FlatList,
   Image,
-  Alert,
 } from 'react-native';
 import {useAuth} from '../../context/AuthContext';
 import Headers from '@app/components/header';
@@ -15,11 +14,9 @@ import colors from '@app/theme/colors';
 import {MyText} from '@app/components';
 import {helper} from '@app/common';
 import Footer from '@app/components/footer';
-import {useNavigation} from '@react-navigation/native';
 
 export const HomeScreen = () => {
   const {signOut} = useAuth();
-  const navigation = useNavigation<any>();
   const [selectedTab, setSelectedTab] = useState<'single' | 'combo'>('single');
   const [data, setData] = useState<any[]>([
     {
@@ -153,20 +150,7 @@ export const HomeScreen = () => {
           )}
         />
       </View>
-      <Footer
-        isShowButtonBack={false}
-        labelButtonNext="Thanh toán"
-        onPressNext={() => {
-          if (itemSelected === null) {
-            Alert.alert('Thông báo', 'Vui lòng chọn sản phẩm');
-            return;
-          }
-          console.log('Thanh toán');
-          navigation.navigate('Payment', {
-            item: itemSelected,
-          });
-        }}
-      />
+      <Footer labelButtonNext="Thanh toán" onPressNext={() => {}} />
     </View>
   );
 };

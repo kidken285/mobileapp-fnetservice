@@ -2,6 +2,7 @@ import metrics from '@app/theme/metrics';
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import MyText from '../text';
+import colors from '@app/theme/colors';
 
 const Header = ({title}: {title: string}) => {
   return (
@@ -18,7 +19,7 @@ const Header = ({title}: {title: string}) => {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: '#0088CC',
+    backgroundColor: colors.primary.main,
     height: metrics.screenHeight * 0.2, // 20% of screen height
     position: 'relative',
   },

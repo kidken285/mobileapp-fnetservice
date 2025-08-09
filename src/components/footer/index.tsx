@@ -6,10 +6,12 @@ import colors from '@app/theme/colors';
 import MyIcon from '../icon/MyIcon';
 
 const Footer = ({
+  isShowButtonBack = true,
   labelButtonNext,
   onPressBack,
   onPressNext,
 }: {
+  isShowButtonBack?: boolean;
   labelButtonNext: string;
   onPressBack?: () => void;
   onPressNext?: () => void;
@@ -24,33 +26,38 @@ const Footer = ({
         borderTopWidth: 1,
         borderTopColor: colors.separate,
       }}>
-      <TouchableOpacity onPress={onPressBack}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignContent: 'center',
-            alignItems: 'center',
-            gap: 10,
-          }}>
+      {isShowButtonBack ? (
+        <TouchableOpacity onPress={onPressBack}>
           <View
             style={{
-              height: 40,
-              width: 40,
-              backgroundColor: colors.primary.main,
-              borderRadius: 20,
-              justifyContent: 'center',
+              flexDirection: 'row',
+              alignContent: 'center',
               alignItems: 'center',
+              gap: 10,
             }}>
-            <MyIcon
-              family="Ionicons"
-              name="chevron-back-outline"
-              size={20}
-              color="#fff"
-            />
+            <View
+              style={{
+                height: 40,
+                width: 40,
+                backgroundColor: colors.primary.main,
+                borderRadius: 20,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <MyIcon
+                family="Ionicons"
+                name="chevron-back-outline"
+                size={20}
+                color="#fff"
+              />
+            </View>
+            <MyText>Trở lại</MyText>
           </View>
-          <MyText>Trở lại</MyText>
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      ) : (
+        <View />
+      )}
+
       <TouchableOpacity
         onPress={onPressNext}
         style={{

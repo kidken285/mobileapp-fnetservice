@@ -1,7 +1,5 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { storage } from '@app/storage';
-
-const AUTH_TOKEN_KEY = 'userToken';
+import React, {createContext, useContext} from 'react';
+import {useAuthStore} from '@app/store/authStore';
 
 type AuthContextType = {
   isLoading: boolean;
@@ -13,48 +11,37 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [userToken, setUserToken] = useState<string | null>(null);
+export const AuthProvider: React.FC<{children: React.ReactNode}> = ({
+  children,
+}) => {
+  const userToken = useAuthStore(s => s.userToken);
+  const isHydrated = useAuthStore(s => s.isHydrated);
+  const signIn = useAuthStore(s => s.signIn);
+  const signOut = useAuthStore(s => s.signOut);
+  const signUp = useAuthStore(s => s.signUp);
 
-  useEffect(() => {
-    // Check if user is logged in when app starts
-    bootstrapAsync();
-  }, []);
-
-  const bootstrapAsync = () => {
-    try {
-      const token = storage.getString(AUTH_TOKEN_KEY);
-      setUserToken(token ?? null);  
-    } catch (e) {
-      // Handle error
-      console.error(e);
-    } finally {
-      setIsLoading(false);
+  // Fallback to avoid being stuck on loading if persistence hydration doesn't trigger
+  React.useEffect(() => {
+    if (!isHydrated) {
+      const id = setTimeout(() => {
+        if (!useAuthStore.getState().isHydrated) {
+          useAuthStore.getState().setHydrated(true);
+        }
+      }, 0);
+      return () => clearTimeout(id);
     }
-  };
+  }, [isHydrated]);
 
   const authContext = {
-    isLoading,
+    isLoading: !isHydrated,
     userToken,
-    signIn: (token: string) => {
-      storage.set(AUTH_TOKEN_KEY, token);
-      setUserToken(token);
-    },
-    signOut: () => {
-      storage.delete(AUTH_TOKEN_KEY);
-      setUserToken(null);
-    },
-    signUp: (token: string) => {
-      storage.set(AUTH_TOKEN_KEY, token);
-      setUserToken(token);
-    },
+    signIn,
+    signOut,
+    signUp,
   };
 
   return (
-    <AuthContext.Provider value={authContext}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={authContext}>{children}</AuthContext.Provider>
   );
 };
 
