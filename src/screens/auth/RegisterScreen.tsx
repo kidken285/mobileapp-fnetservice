@@ -24,6 +24,8 @@ import MyIcon from '@app/components/icon/MyIcon';
 import colors from '@app/theme/colors';
 import metrics from '@app/theme/metrics';
 import Footer from '@app/components/footer';
+import {useApp} from '@app/AppProvider';
+import {helper} from '@app/common';
 
 type Props = NativeStackNavigationProp<AuthStackParamList, 'Register'>;
 
@@ -40,81 +42,47 @@ export const RegisterScreen = () => {
 
   const {...methods} = useForm<FormUserValues>({
     mode: 'onChange',
-    defaultValues: {
-      fullName: '',
-      gender: '',
-      username: '',
-      phone: '',
-      otp: '',
-    },
+    defaultValues: __DEV__
+      ? {
+          fullName: '1',
+          gender: '2',
+          username: '3',
+          phone: '4',
+          otp: '5',
+        }
+      : {
+          fullName: '',
+          gender: '',
+          username: '',
+          phone: '',
+          otp: '',
+        },
   });
 
   const [formError, setError] = useState<Boolean>(false);
 
-  const [formData, setFormData] = useState({
-    fullName: '',
-    gender: '',
-    username: '',
-    phone: '',
-    otp: '',
-  });
-
-  const [errors, setErrors] = useState({
-    fullName: '',
-    gender: '',
-    username: '',
-    phone: '',
-    otp: '',
-  });
-
-  const validateForm = () => {
-    let isValid = true;
-    const newErrors = {...errors};
-
-    if (!formData.fullName) {
-      newErrors.fullName = 'Họ tên không được để trống';
-      isValid = false;
-    }
-
-    if (!formData.gender) {
-      newErrors.gender = 'Vui lòng chọn giới tính';
-      isValid = false;
-    }
-
-    if (!formData.username) {
-      newErrors.username = 'Tài khoản không được để trống';
-      isValid = false;
-    }
-
-    if (!formData.phone) {
-      newErrors.phone = 'Số điện thoại không được để trống';
-      isValid = false;
-    } else if (!/^[0-9]{10}$/.test(formData.phone)) {
-      newErrors.phone = 'Số điện thoại không hợp lệ';
-      isValid = false;
-    }
-
-    if (!formData.otp) {
-      newErrors.otp = 'Mã OTP không được để trống';
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
-  const handleRegister = () => {
-    if (validateForm()) {
-      // In a real app, you would make an API call here
-      signUp('dummy-token');
-    }
-  };
+  const {showLoader, hideLoader, showFlashMessage} = useApp();
 
   const onError: SubmitErrorHandler<FormUserValues> = (errors, e) => {
     return console.log({errors});
   };
 
   const onSubmit: SubmitHandler<FormUserValues> = async data => {
+    try {
+      showLoader('Đang tải...');
+      await helper.sleep(1000);
+      hideLoader();
+      navigation.navigate('Login');
+    } catch (error) {
+      hideLoader();
+    } finally {
+      showFlashMessage('top', {
+        message: 'Thành công',
+        description: 'Đăng ký thành công',
+        type: 'success',
+      });
+    }
+
     console.log('data', data);
   };
 

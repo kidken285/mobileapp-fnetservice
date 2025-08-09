@@ -5,15 +5,20 @@ import {RootNavigator} from './src/navigation/RootNavigator';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {StyleSheet} from 'react-native';
 import {ThemeProvider} from '@app/theme/ThemeProvider';
+import {AppProvider} from '@app/AppProvider';
 
 function App(): React.JSX.Element {
   return (
     <GestureHandlerRootView style={styles.container}>
-      <ThemeProvider>
-        <AuthProvider>
-          <RootNavigator />
-        </AuthProvider>
-      </ThemeProvider>
+      <PaperProvider>
+        <ThemeProvider>
+          <AppProvider>
+            <AuthProvider>
+              <RootNavigator />
+            </AuthProvider>
+          </AppProvider>
+        </ThemeProvider>
+      </PaperProvider>
     </GestureHandlerRootView>
   );
 }
