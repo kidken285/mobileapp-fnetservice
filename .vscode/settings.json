@@ -1,0 +1,20 @@
+{
+    "eslint.alwaysShowStatus": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "prettier.singleQuote": true,
+    "editor.formatOnSave": true,
+    "prettier.tabWidth": 4,
+    "[erb]": {
+        "editor.formatOnSave": true
+    },
+    "files.autoSave": "off",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+    "prettier.trailingComma": "none",
+    "javascript.validate.enable": true,
+    "eslint.workingDirectories": ["./client"]
+}

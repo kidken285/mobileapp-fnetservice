@@ -1,18 +1,19 @@
 import React from 'react';
-import { PaperProvider } from 'react-native-paper';
-import { AuthProvider } from './src/context/AuthContext';
-import { RootNavigator } from './src/navigation/RootNavigator';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StyleSheet } from 'react-native';
+import {PaperProvider} from 'react-native-paper';
+import {AuthProvider} from './src/context/AuthContext';
+import {RootNavigator} from './src/navigation/RootNavigator';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {StyleSheet} from 'react-native';
+import {ThemeProvider} from '@app/theme/ThemeProvider';
 
 function App(): React.JSX.Element {
   return (
     <GestureHandlerRootView style={styles.container}>
-      <PaperProvider>
+      <ThemeProvider>
         <AuthProvider>
           <RootNavigator />
         </AuthProvider>
-      </PaperProvider>
+      </ThemeProvider>
     </GestureHandlerRootView>
   );
 }

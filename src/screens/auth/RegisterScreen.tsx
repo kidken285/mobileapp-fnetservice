@@ -1,17 +1,55 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { TextInput, Button, Text, HelperText, useTheme } from 'react-native-paper';
-import { useAuth } from '../../context/AuthContext';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '../../navigation/types';
-import { useNavigation } from '@react-navigation/native';
+import React, {useState} from 'react';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  KeyboardTypeOptions,
+  TouchableOpacity,
+} from 'react-native';
+import {TextInput, Button, HelperText, useTheme} from 'react-native-paper';
+import {MyText} from '@components';
+import {useAuth} from '../../context/AuthContext';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {AuthStackParamList} from '../../navigation/types';
+import {useNavigation} from '@react-navigation/native';
+import Header from '@app/components/header';
+import {
+  FormProvider,
+  SubmitErrorHandler,
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form';
+import {MyInput} from '@app/components/input/MyInput';
+import MyIcon from '@app/components/icon/MyIcon';
+import colors from '@app/theme/colors';
+import metrics from '@app/theme/metrics';
+import Footer from '@app/components/footer';
 
 type Props = NativeStackNavigationProp<AuthStackParamList, 'Register'>;
 
+type FormUserValues = {
+  fullName: string;
+  gender: string;
+  username: string;
+  phone: string;
+  otp: string;
+};
 export const RegisterScreen = () => {
   const navigation = useNavigation<Props>();
-  const { signUp } = useAuth();
-  const theme = useTheme();
+  const {signUp} = useAuth();
+
+  const {...methods} = useForm<FormUserValues>({
+    mode: 'onChange',
+    defaultValues: {
+      fullName: '',
+      gender: '',
+      username: '',
+      phone: '',
+      otp: '',
+    },
+  });
+
+  const [formError, setError] = useState<Boolean>(false);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -31,7 +69,7 @@ export const RegisterScreen = () => {
 
   const validateForm = () => {
     let isValid = true;
-    const newErrors = { ...errors };
+    const newErrors = {...errors};
 
     if (!formData.fullName) {
       newErrors.fullName = 'Họ tên không được để trống';
@@ -72,92 +110,92 @@ export const RegisterScreen = () => {
     }
   };
 
+  const onError: SubmitErrorHandler<FormUserValues> = (errors, e) => {
+    return console.log({errors});
+  };
+
+  const onSubmit: SubmitHandler<FormUserValues> = async data => {
+    console.log('data', data);
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.scrollView}>
-      <View style={styles.container}>
-        <Text variant="headlineMedium" style={styles.title}>
-          Đăng ký tài khoản hội viên
-        </Text>
-
-        <TextInput
-          mode="outlined"
-          label="Họ tên"
-          value={formData.fullName}
-          onChangeText={(text) => setFormData({ ...formData, fullName: text })}
-          error={!!errors.fullName}
-          style={styles.input}
-        />
-        <HelperText type="error" visible={!!errors.fullName}>
-          {errors.fullName}
-        </HelperText>
-
-        <TextInput
-          mode="outlined"
-          label="Giới tính"
-          value={formData.gender}
-          onChangeText={(text) => setFormData({ ...formData, gender: text })}
-          error={!!errors.gender}
-          style={styles.input}
-        />
-        <HelperText type="error" visible={!!errors.gender}>
-          {errors.gender}
-        </HelperText>
-
-        <TextInput
-          mode="outlined"
-          label="Tài khoản"
-          value={formData.username}
-          onChangeText={(text) => setFormData({ ...formData, username: text })}
-          error={!!errors.username}
-          style={styles.input}
-        />
-        <HelperText type="error" visible={!!errors.username}>
-          {errors.username}
-        </HelperText>
-
-        <TextInput
-          mode="outlined"
-          label="Số điện thoại"
-          value={formData.phone}
-          onChangeText={(text) => setFormData({ ...formData, phone: text })}
-          error={!!errors.phone}
-          keyboardType="phone-pad"
-          style={styles.input}
-        />
-        <HelperText type="error" visible={!!errors.phone}>
-          {errors.phone}
-        </HelperText>
-
-        <TextInput
-          mode="outlined"
-          label="Mã OTP"
-          value={formData.otp}
-          onChangeText={(text) => setFormData({ ...formData, otp: text })}
-          error={!!errors.otp}
-          keyboardType="number-pad"
-          style={styles.input}
-        />
-        <HelperText type="error" visible={!!errors.otp}>
-          {errors.otp}
-        </HelperText>
-
-        <Button
-          mode="contained"
-          onPress={handleRegister}
-          style={styles.button}
-        >
-          Bước kế tiếp
-        </Button>
-
-        <Button
-          mode="text"
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          Trở lại
-        </Button>
-      </View>
-    </ScrollView>
+    <View style={styles.container}>
+      <Header title="Đăng ký tài khoản hội viên" />
+      <ScrollView contentContainerStyle={styles.scrollView}>
+        {formError ? (
+          <View>
+            <MyText style={{color: 'red'}}>
+              There was a problem with loading the form. Please try again later.
+            </MyText>
+          </View>
+        ) : (
+          <View style={{padding: 16}}>
+            <FormProvider {...methods}>
+              <MyInput
+                name="fullName"
+                label="Họ tên"
+                placeholder="Nhập họ tên"
+                keyboardType="default"
+                rules={{
+                  required: 'Họ tên là bắt buộc!',
+                }}
+                setFormError={setError}
+                editable={true}
+              />
+              <MyInput
+                name="gender"
+                label="Giới tính"
+                placeholder="Nhập giới tính"
+                keyboardType="default"
+                rules={{
+                  required: 'Giới tính là bắt buộc!',
+                }}
+                setFormError={setError}
+                editable={true}
+              />
+              <MyInput
+                name="username"
+                label="Tài khoản"
+                placeholder="Nhập tài khoản"
+                keyboardType="default"
+                rules={{
+                  required: 'Tài khoản là bắt buộc!',
+                }}
+                setFormError={setError}
+                editable={true}
+              />
+              <MyInput
+                name="phone"
+                label="Số điện thoại"
+                placeholder="Nhập số điện thoại"
+                keyboardType="phone-pad"
+                rules={{
+                  required: 'Số điện thoại là bắt buộc!',
+                }}
+                setFormError={setError}
+                editable={true}
+              />
+              <MyInput
+                name="otp"
+                label="Mã OTP"
+                placeholder="Nhập mã OTP"
+                keyboardType="number-pad"
+                rules={{
+                  required: 'Mã OTP là bắt buộc!',
+                }}
+                setFormError={setError}
+                editable={true}
+              />
+            </FormProvider>
+          </View>
+        )}
+      </ScrollView>
+      <Footer
+        labelButtonNext="Bước kế tiếp"
+        onPressNext={methods.handleSubmit(onSubmit, onError)}
+        onPressBack={() => navigation.goBack()}
+      />
+    </View>
   );
 };
 
@@ -167,7 +205,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: '#fff',
   },
   title: {

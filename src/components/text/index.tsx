@@ -1,6 +1,16 @@
 import React from 'react';
 import {Text, TextProps, StyleProp, TextStyle} from 'react-native';
 
+
+/**
+ * Cấu hình cho tablet
+Body (mặc định trên tablet): 18 pt/sp
+Body nhỏ / phụ: 16 pt/sp
+Caption/overline: 14 pt/sp
+Button/inputs: 18 pt/sp
+Title: 22–24 pt/sp
+Headline/H1: 28–32 pt/sp
+ */
 // All Roboto font variants available in assets/fonts
 export type MyTextVariant =
   | 'thin' // fontWeight: 100
@@ -35,7 +45,7 @@ const fontFamilyMap: Record<MyTextVariant, string> = {
 };
 
 // Default values
-const defaultFontSize = 14;
+const defaultFontSize = 18;
 const defaultColor = '#000000';
 const defaultVariant: MyTextVariant = 'regular';
 

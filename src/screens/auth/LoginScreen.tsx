@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { TextInput, Button, Text, HelperText } from 'react-native-paper';
-import { useAuth } from '../../context/AuthContext';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '../../navigation/types';
-import { useNavigation } from '@react-navigation/native';
+import React, {useState} from 'react';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableWithoutFeedback,
+} from 'react-native';
+import {TextInput, Button, HelperText} from 'react-native-paper';
+import {MyText} from '@components';
+import {useAuth} from '../../context/AuthContext';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {AuthStackParamList} from '../../navigation/types';
+import {useNavigation} from '@react-navigation/native';
+import metrics from '@app/theme/metrics';
 
 type Props = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
 export const LoginScreen = () => {
   const navigation = useNavigation<Props>();
-  const { signIn } = useAuth();
+  const {signIn} = useAuth();
 
   const [formData, setFormData] = useState({
     username: '',
@@ -26,7 +33,7 @@ export const LoginScreen = () => {
 
   const validateForm = () => {
     let isValid = true;
-    const newErrors = { ...errors };
+    const newErrors = {...errors};
 
     if (!formData.username) {
       newErrors.username = 'Tài khoản không được để trống';
@@ -51,89 +58,107 @@ export const LoginScreen = () => {
 
   const renderRequiredLabel = (label: string) => (
     <View style={styles.labelContainer}>
-      <Text style={styles.labelText}>{label}</Text>
-      <Text style={styles.requiredStar}>*</Text>
+      <MyText style={styles.requiredStar}>*</MyText>
+      <MyText style={styles.labelText}>{label}</MyText>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <Text variant="headlineMedium" style={styles.headerText}>
-            Đăng nhập hệ thống
-          </Text>
-        </View>
-        <View style={styles.wavyBottom} />
-      </View>
-
-      <View style={styles.content}>
-        <View style={styles.formContainer}>
-          {renderRequiredLabel('Tài khoản')}
-          <TextInput
-            mode="outlined"
-            placeholder="Nhập tài khoản"
-            value={formData.username}
-            onChangeText={(text) => setFormData({ ...formData, username: text })}
-            error={!!errors.username}
-            style={styles.input}
-            outlineStyle={styles.inputOutline}
-            contentStyle={styles.inputContent}
-          />
-          <HelperText type="error" visible={!!errors.username}>
-            {errors.username}
-          </HelperText>
-
-          {renderRequiredLabel('Mật khẩu')}
-          <TextInput
-            mode="outlined"
-            placeholder="Nhập mật khẩu"
-            value={formData.password}
-            onChangeText={(text) => setFormData({ ...formData, password: text })}
-            secureTextEntry={!showPassword}
-            error={!!errors.password}
-            // right={
-            //   <TextInput.Icon
-            //     icon={showPassword ? 'eye-off' : 'eye'}
-            //     onPress={() => setShowPassword(!showPassword)}
-            //   />
-            // }
-            style={styles.input}
-            outlineStyle={styles.inputOutline}
-            contentStyle={styles.inputContent}
-          />
-          <HelperText type="error" visible={!!errors.password}>
-            {errors.password}
-          </HelperText>
-        </View>
-
-        <View style={styles.footer}>
-          <View style={styles.footerLeft}>
-            <Text style={styles.noAccountText}>Chưa có tài khoản </Text>
-            <Button
-              mode="text"
-              onPress={() => navigation.navigate('Register')}
-              textColor="#0088CC"
-              style={styles.registerButton}
-              
-              labelStyle={styles.registerButtonLabel}
-            >
-              Đăng ký ngay
-            </Button>
+    <ScrollView
+      contentContainerStyle={{flex: 1}}
+      contentInsetAdjustmentBehavior={'automatic'}
+      showsVerticalScrollIndicator={false}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.headerContent}>
+            <MyText fontSize={32} variant="bold" style={styles.headerText}>
+              Đăng nhập hệ thống
+            </MyText>
           </View>
-          <Button
-            mode="contained"
-            onPress={handleLogin}
-            style={styles.loginButton}
-            buttonColor="#0088CC"
-            contentStyle={styles.loginButtonContent}
-            labelStyle={styles.loginButtonLabel}
-          >
-            Đăng nhập
-          </Button>
+          <View style={styles.wavyBottom} />
+        </View>
+
+        <View style={styles.content}>
+          <View style={styles.formContainer}>
+            {renderRequiredLabel('Tài khoản')}
+            <TextInput
+              mode="outlined"
+              placeholder="Nhập tài khoản"
+              value={formData.username}
+              onChangeText={text => setFormData({...formData, username: text})}
+              error={!!errors.username}
+              style={styles.input}
+              outlineStyle={styles.inputOutline}
+              contentStyle={styles.inputContent}
+            />
+            <HelperText type="error" visible={!!errors.username}>
+              {errors.username}
+            </HelperText>
+
+            {renderRequiredLabel('Mật khẩu')}
+            <TextInput
+              mode="outlined"
+              placeholder="Nhập mật khẩu"
+              value={formData.password}
+              onChangeText={text => setFormData({...formData, password: text})}
+              secureTextEntry={!showPassword}
+              error={!!errors.password}
+              right={
+                <TextInput.Icon
+                  icon={showPassword ? 'eye-off' : 'eye'}
+                  onPress={() => setShowPassword(!showPassword)}
+                />
+              }
+              style={styles.input}
+              outlineStyle={styles.inputOutline}
+              contentStyle={styles.inputContent}
+            />
+            <HelperText type="error" visible={!!errors.password}>
+              {errors.password}
+            </HelperText>
+          </View>
+
+          <View style={styles.footer}>
+            <View>
+              <MyText variant="medium" fontSize={18} color="#000">
+                Chưa có tài khoản
+              </MyText>
+              <TouchableWithoutFeedback
+                onPress={() => navigation.navigate('Register')}>
+                <MyText variant="medium" fontSize={25} color="#0088CC">
+                  Đăng ký ngay
+                </MyText>
+              </TouchableWithoutFeedback>
+            </View>
+            <Button
+              mode="outlined"
+              textColor="#000"
+              style={[
+                {
+                  borderColor: '#D3D3D3',
+                  borderWidth: 1,
+                  marginTop: 16,
+                  paddingVertical: 8,
+                  width: metrics.screenWidth / 6,
+                },
+              ]}
+              labelStyle={{fontWeight: 'bold', fontSize: 16}}
+              onPress={() => navigation.navigate('Login')}>
+              Đăng nhập
+            </Button>
+            {/* <Button
+              mode="outlined"
+              onPress={handleLogin}
+              style={styles.loginButton}
+              buttonColor="#0088CC"
+              contentStyle={styles.loginButtonContent}
+              labelStyle={styles.loginButtonLabel}>
+              Đăng nhập
+            </Button> */}
+          </View>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -144,7 +169,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#0088CC',
-    height: 20, // 20% of screen height
+    height: metrics.screenHeight * 0.2, // 20% of screen height
     position: 'relative',
   },
   headerContent: {
@@ -154,8 +179,6 @@ const styles = StyleSheet.create({
   },
   headerText: {
     color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 3, // Responsive font size
   },
   wavyBottom: {
     position: 'absolute',
@@ -169,33 +192,33 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 4, // 4% of screen width
-    paddingTop: 3,
+    paddingTop: 30,
+    paddingHorizontal: 10,
   },
   formContainer: {
     width: '100%',
     alignSelf: 'center',
   },
   labelContainer: {
+    gap: 5,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 1,
+    marginBottom: 10,
   },
   labelText: {
-    fontSize: 2.2,
     color: '#000',
   },
   requiredStar: {
     color: 'red',
     marginLeft: 4,
-    fontSize: 2.2,
+    fontSize: 18,
   },
   input: {
     backgroundColor: '#fff',
   },
   inputContent: {
     height: 7, // Tăng chiều cao input
-    fontSize: 2,
+    fontSize: 18,
   },
   inputOutline: {
     borderRadius: 8,
@@ -206,32 +229,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: 4,
-  },
-  footerLeft: {
-    // flexDirection: 'row',
-    alignItems: 'center',
-  },
-  noAccountText: {
-    color: '#000',
-    fontSize: 20,
-  },
-  registerButton: {
-    marginLeft: -8,
-  },
-  registerButtonLabel: {
-    fontSize: 20,
-    lineHeight: 25
-  },
-  loginButton: {
-    borderRadius: 8,
-    paddingHorizontal: 4,
-    height: 7, // Tăng chiều cao button
-  },
-  loginButtonContent: {
-    height: 7,
-  },
-  loginButtonLabel: {
-    fontSize: 2.2,
-    fontWeight: 'bold',
   },
 });
