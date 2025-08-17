@@ -26,6 +26,7 @@ import metrics from '@app/theme/metrics';
 import Footer from '@app/components/footer';
 import {useApp} from '@app/AppProvider';
 import {helper} from '@app/common';
+import {registerApi} from '@app/services/api/authenApi';
 
 type Props = NativeStackNavigationProp<AuthStackParamList, 'Register'>;
 
@@ -71,15 +72,30 @@ export const RegisterScreen = () => {
     try {
       showLoader('Đang tải...');
       await helper.sleep(1000);
-      hideLoader();
-      navigation.navigate('Login');
+      const response = await registerApi({
+        fullName: data.fullName,
+        passCode: data.otp,
+        phone: data.phone,
+        userName: data.username,
+        gender: Number(data.gender ? 0 : 1),
+      });
+      if (!response.isError) {
+        hideLoader();
+        showFlashMessage('top', {
+          message: 'Thành công',
+          description: 'Đăng ký thành công',
+          type: 'success',
+        });
+        navigation.navigate('Login');
+      } else {
+        throw new Error(response.message);
+      }
     } catch (error) {
       hideLoader();
-    } finally {
       showFlashMessage('top', {
-        message: 'Thành công',
-        description: 'Đăng ký thành công',
-        type: 'success',
+        message: 'Lỗi',
+        description: 'Đăng ký thất bại',
+        type: 'error',
       });
     }
 

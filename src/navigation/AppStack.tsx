@@ -2,6 +2,7 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {HomeScreen} from '../screens/app/HomeScreen';
 import {PaymentScreen} from '../screens/app/PaymentScreen';
+import {ScanScreen} from '../screens/app/ScanScreen';
 import {AppStackParamList} from './types';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -18,6 +19,14 @@ export const AppStack = () => {
       <Stack.Screen
         name="Payment"
         component={PaymentScreen}
+        options={{
+          animation: 'slide_from_bottom',
+          presentation: 'modal',
+        }}
+      />
+      <Stack.Screen
+        name="Scan"
+        component={ScanScreen}
         options={{
           animation: 'slide_from_bottom',
           presentation: 'modal',

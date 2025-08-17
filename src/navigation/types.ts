@@ -10,6 +10,7 @@ export type AppStackParamList = {
   Home: undefined;
   Profile: undefined;
   Payment: undefined;
+  Scan: undefined;
 };
 
 export type RootStackParamList = {

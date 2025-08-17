@@ -1,0 +1,5 @@
+export const LIST_USERS = 'LIST_USERS';
+export const ACCESS_TOKEN = 'ACCESS_TOKEN';
+export const TOKEN_NOTIFICATION = 'TOKEN_NOTIFICATION';
+export const META_DATA_CODEPUSH = 'META_DATA_CODEPUSH';
+export const HASH_NOTI = 'HASH_NOTI';

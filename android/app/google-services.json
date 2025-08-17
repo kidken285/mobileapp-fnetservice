@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "951177231163",
+    "project_id": "mapi-client",
+    "storage_bucket": "mapi-client.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:951177231163:android:f6a6262c2302b4292a951e",
+        "android_client_info": {
+          "package_name": "fus.jsc.fnetservice"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFm21H7cJSzz4nkc_zTwWojriP1R2Jy28"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

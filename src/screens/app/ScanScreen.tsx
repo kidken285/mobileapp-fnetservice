@@ -1,156 +1,136 @@
-import React, {useState} from 'react';
-import {
-  View,
-  Text,
-  Button,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  FlatList,
-  Image,
-} from 'react-native';
-import {useAuth} from '../../context/AuthContext';
-import Headers from '@app/components/header';
-import colors from '@app/theme/colors';
-import {MyText} from '@app/components';
-import {helper} from '@app/common';
+import React, {useCallback, useEffect, useState} from 'react';
+import {View, StyleSheet, Linking, Alert} from 'react-native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+
 import Footer from '@app/components/footer';
+import {
+  Camera,
+  type CameraPermissionStatus,
+  useCameraDevice,
+  useCodeScanner,
+} from 'react-native-vision-camera';
 
-export const HomeScreen = () => {
-  const {signOut} = useAuth();
-  const [selectedTab, setSelectedTab] = useState<'single' | 'combo'>('single');
-  const [data, setData] = useState<any[]>([
-    {
-      id: 1,
-      name: 'Combo Khoai tây chiên 1',
-      price: 100000,
-      image:
-        'https://texaschickenvn.com/vnt_upload/product/07_2023/Combo_B_Ga_sot_bo_toi__thao_moc.png',
-    },
-    {
-      id: 2,
-      name: 'Combo Khoai tây chiên 2',
-      price: 150000,
-      image:
-        'https://texaschickenvn.com/vnt_upload/product/07_2023/Combo_B_Ga_sot_bo_toi__thao_moc.png',
-    },
-    {
-      id: 3,
-      name: 'Combo Khoai tây chiên 3',
-      price: 120000,
-      image:
-        'https://pimagerepository.texaschicken.com/feaeda84-705c-4158-8cf6-e35fd8fc7441_actual.png',
-    },
-    {
-      id: 4,
-      name: 'Combo Khoai tây chiên 4',
-      price: 140000,
-      image:
-        'https://pimagerepository.texaschicken.com/feaeda84-705c-4158-8cf6-e35fd8fc7441_actual.png',
-    },
-  ]);
+import RNPermissions, {
+  type NotificationOption,
+  PERMISSIONS,
+  type Permission,
+} from 'react-native-permissions';
+import {scanQRApi} from '@app/services/api/homeApi';
 
-  const [itemSelected, setItemSelected] = useState<any>(null);
-  return (
-    <View style={styles.container}>
-      <Headers title="Hội viên: Huỳnh Dương Hoàng" />
-      <View style={{alignContent: 'center', alignItems: 'center'}}>
-        <View
-          style={{
-            marginTop: 20,
-            borderColor: colors.primary.main,
-            borderWidth: 1,
-            borderRadius: 20,
-            flexDirection: 'row',
-            overflow: 'hidden',
-          }}>
-          <TouchableWithoutFeedback onPress={() => setSelectedTab('single')}>
-            <View
-              style={{
-                paddingVertical: 10,
-                width: 120,
-                backgroundColor:
-                  selectedTab === 'single'
-                    ? colors.primary.main
-                    : 'transparent',
-                borderRadius: 20,
-                alignItems: 'center',
-                justifyContent: 'center',
-                alignContent: 'center',
-              }}>
-              <MyText
-                color={selectedTab === 'single' ? '#fff' : colors.text.primary}
-                variant="medium">
-                Nạp
-              </MyText>
-            </View>
-          </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback onPress={() => setSelectedTab('combo')}>
-            <View
-              style={{
-                paddingVertical: 10,
-                width: 120,
-                backgroundColor:
-                  selectedTab === 'combo' ? colors.primary.main : 'transparent',
-                borderRadius: 20,
-                alignItems: 'center',
-                justifyContent: 'center',
-                alignContent: 'center',
-              }}>
-              <MyText
-                color={selectedTab === 'combo' ? '#fff' : colors.text.primary}
-                variant="medium">
-                Combo
-              </MyText>
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
-      </View>
-      <View style={{flex: 1, backgroundColor: '#fff', paddingTop: 30}}>
-        <FlatList
-          data={data}
-          numColumns={2}
-          columnWrapperStyle={{gap: 15}}
-          contentContainerStyle={{
-            gap: 15,
-            alignContent: 'center',
-            alignItems: 'center',
+export const ScanScreen = () => {
+  const [cameraPermissionStatus, setCameraPermissionStatus] =
+    useState<CameraPermissionStatus>('not-determined');
+  const [hasPermission, setHasPermission] = useState(false);
+  const [isCameraActive, setIsCameraActive] = useState(true);
+  const camera = React.useRef<Camera>(null);
+  const device = useCameraDevice('back');
+  const navigation = useNavigation();
+
+  const codeScanner = useCodeScanner({
+    codeTypes: ['qr', 'ean-13'],
+    onCodeScanned: codes => {
+      const value = codes[0]?.value;
+      if (value) {
+        console.log('QR Code scanned:', value);
+        setIsCameraActive(false);
+
+        createInfoCCCD(value);
+      }
+    },
+  });
+
+  const createInfoCCCD = useCallback(async (data: string) => {
+    try {
+      console.log('data', data);
+      let body = {
+        qrCode: data,
+      };
+      const response = await scanQRApi(body);
+      console.log('response', response);
+    } catch (error) {
+      console.log('error', error);
+    } finally {
+      Alert.alert('QR Code scanned:', data);
+    }
+  }, []);
+
+  const requestCameraPermission = useCallback(async () => {
+    const currentStatus = await RNPermissions.check(PERMISSIONS.IOS.CAMERA);
+    console.log('currentStatus', currentStatus);
+    // const currentStatus = Camera.getCameraPermissionStatus();
+    // setCameraPermissionStatus(currentStatus);
+    if (currentStatus === 'granted') {
+      setHasPermission(true);
+      return;
+    }
+
+    if (currentStatus === 'denied') {
+      setHasPermission(false);
+      await Linking.openSettings();
+      return;
+    }
+
+    const newStatus = await RNPermissions.request(PERMISSIONS.ANDROID.CAMERA);
+
+    console.log('newStatus', newStatus);
+    setCameraPermissionStatus(newStatus as CameraPermissionStatus);
+    setHasPermission(newStatus === 'granted');
+    if (newStatus === 'denied') {
+      await Linking.openSettings();
+    }
+  }, []);
+
+  useEffect(() => {
+    requestCameraPermission();
+  }, [requestCameraPermission]);
+
+  useFocusEffect(
+    useCallback(() => {
+      // Re-check permission when screen gains focus (e.g., after returning from Settings)
+      requestCameraPermission();
+    }, [requestCameraPermission]),
+  );
+
+  // Note: scanning handled via useCodeScanner above
+
+  if (!hasPermission) {
+    return (
+      <View style={styles.container}>
+        <Footer
+          labelButtonNext="Yêu cầu quyền"
+          onPressNext={requestCameraPermission}
+          onPressBack={() => {
+            setIsCameraActive(false);
+            navigation.goBack();
           }}
-          renderItem={({item}) => (
-            <TouchableWithoutFeedback
-              onPress={() => setItemSelected(item)}
-              disabled={itemSelected?.id === item.id}>
-              <View
-                style={{
-                  paddingVertical: 10,
-                  paddingHorizontal: 20,
-                  flexDirection: 'row',
-                  borderRadius: 10,
-                  borderColor: colors.divider,
-                  borderWidth: 1,
-                  gap: 10,
-                  backgroundColor:
-                    itemSelected?.id === item.id
-                      ? colors.primary.main
-                      : 'transparent',
-                }}>
-                <View>
-                  <Image
-                    source={{uri: item.image}}
-                    style={{width: 100, height: 100}}
-                  />
-                </View>
-                <View style={{justifyContent: 'space-evenly', gap: 10}}>
-                  <MyText variant="medium">{item.name}</MyText>
-                  <MyText variant="medium">
-                    {helper.formatDisplayPoint(item.price, ' đ')}
-                  </MyText>
-                </View>
-              </View>
-            </TouchableWithoutFeedback>
-          )}
         />
       </View>
-      <Footer labelButtonNext="Thanh toán" onPressNext={() => {}} />
+    );
+  }
+
+  if (device == null) {
+    return <View style={styles.container} />;
+  }
+
+  return (
+    <View style={styles.container}>
+      <Camera
+        ref={camera}
+        style={StyleSheet.absoluteFill}
+        device={device}
+        isActive={isCameraActive}
+        enableZoomGesture
+        photo={true}
+        codeScanner={codeScanner}
+      />
+      <Footer
+        labelButtonNext="Quét lại"
+        onPressNext={() => setIsCameraActive(true)}
+        onPressBack={() => {
+          setIsCameraActive(false);
+          navigation.goBack();
+        }}
+      />
     </View>
   );
 };

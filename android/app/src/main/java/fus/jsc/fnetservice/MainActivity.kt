@@ -1,4 +1,4 @@
-package com.fnetservice
+package fus.jsc.fnetservice
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

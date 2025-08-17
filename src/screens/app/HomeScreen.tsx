@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   FlatList,
   Image,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import {useAuth} from '../../context/AuthContext';
 import Headers from '@app/components/header';
@@ -16,46 +17,62 @@ import {MyText} from '@app/components';
 import {helper} from '@app/common';
 import Footer from '@app/components/footer';
 import {useNavigation} from '@react-navigation/native';
+import {useUserStore} from '@app/store/userStore';
+import {dashBoardApi} from '@app/services/api/homeApi';
 
 export const HomeScreen = () => {
   const {signOut} = useAuth();
   const navigation = useNavigation<any>();
   const [selectedTab, setSelectedTab] = useState<'single' | 'combo'>('single');
-  const [data, setData] = useState<any[]>([
-    {
-      id: 1,
-      name: 'Combo Khoai tây chiên 1',
-      price: 100000,
-      image:
-        'https://texaschickenvn.com/vnt_upload/product/07_2023/Combo_B_Ga_sot_bo_toi__thao_moc.png',
-    },
-    {
-      id: 2,
-      name: 'Combo Khoai tây chiên 2',
-      price: 150000,
-      image:
-        'https://texaschickenvn.com/vnt_upload/product/07_2023/Combo_B_Ga_sot_bo_toi__thao_moc.png',
-    },
-    {
-      id: 3,
-      name: 'Combo Khoai tây chiên 3',
-      price: 120000,
-      image:
-        'https://pimagerepository.texaschicken.com/feaeda84-705c-4158-8cf6-e35fd8fc7441_actual.png',
-    },
-    {
-      id: 4,
-      name: 'Combo Khoai tây chiên 4',
-      price: 140000,
-      image:
-        'https://pimagerepository.texaschicken.com/feaeda84-705c-4158-8cf6-e35fd8fc7441_actual.png',
-    },
-  ]);
+  const userInfo = useUserStore(s => s.user);
+
+  const [data, setData] = useState<any[]>([]);
 
   const [itemSelected, setItemSelected] = useState<any>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const response = await dashBoardApi();
+        console.log('response', response);
+      } catch (error) {
+        setData([
+          {
+            id: 1,
+            name: 'Combo Khoai tây chiên 1',
+            price: 100000,
+            image:
+              'https://texaschickenvn.com/vnt_upload/product/07_2023/Combo_B_Ga_sot_bo_toi__thao_moc.png',
+          },
+          {
+            id: 2,
+            name: 'Combo Khoai tây chiên 2',
+            price: 150000,
+            image:
+              'https://texaschickenvn.com/vnt_upload/product/07_2023/Combo_B_Ga_sot_bo_toi__thao_moc.png',
+          },
+          {
+            id: 3,
+            name: 'Combo Khoai tây chiên 3',
+            price: 120000,
+            image:
+              'https://pimagerepository.texaschicken.com/feaeda84-705c-4158-8cf6-e35fd8fc7441_actual.png',
+          },
+          {
+            id: 4,
+            name: 'Combo Khoai tây chiên 4',
+            price: 140000,
+            image:
+              'https://pimagerepository.texaschicken.com/feaeda84-705c-4158-8cf6-e35fd8fc7441_actual.png',
+          },
+        ]);
+      }
+    };
+    loadData();
+  }, []);
   return (
     <View style={styles.container}>
-      <Headers title="Hội viên: Huỳnh Dương Hoàng" />
+      <Headers title={`Hội viên: ${userInfo?.fullName}`} />
       <View style={{alignContent: 'center', alignItems: 'center'}}>
         <View
           style={{
@@ -153,6 +170,14 @@ export const HomeScreen = () => {
           )}
         />
       </View>
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate('Scan');
+        }}
+        style={{minWidth: 120, paddingVertical: 10, paddingHorizontal: 10}}>
+        <MyText>Quét Mã CCCD Test</MyText>
+      </TouchableOpacity>
+
       <Footer
         isShowButtonBack={false}
         labelButtonNext="Thanh toán"

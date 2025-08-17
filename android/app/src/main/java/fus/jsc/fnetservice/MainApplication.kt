@@ -1,4 +1,4 @@
-package com.fnetservice
+package fus.jsc.fnetservice
 
 import android.app.Application
 import com.facebook.react.PackageList

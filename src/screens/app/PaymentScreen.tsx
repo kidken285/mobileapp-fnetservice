@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -18,11 +18,30 @@ import metrics from '@app/theme/metrics';
 import {useNavigation} from '@react-navigation/native';
 import {Button} from 'react-native-paper';
 import MyIcon from '@app/components/icon/MyIcon';
+import {paymentQrApi} from '@app/services/api/paymenyApi';
 const TIME_LEFT = 30;
 export const PaymentScreen = ({route}: any) => {
   const [timeLeft, setTimeLeft] = useState(TIME_LEFT); // 5 minutes in seconds
+  const [qrData, setQrData] = useState(''); // 5 minutes in seconds
   const navigation = useNavigation();
   const timerRef = React.useRef<any>(-1);
+
+  useEffect(() => {
+    getQrPayment();
+  }, []);
+
+  const getQrPayment = async () => {
+    try {
+      const price = route.params?.item?.price;
+      const response = await paymentQrApi(price);
+      console.log('response', response);
+    } catch (error) {
+    } finally {
+      setQrData(
+        `https://img.vietqr.io/image/vietinbank-113366668888-compact2.jpg?amount=${route.params?.item?.price}&addInfo=dong%20gop%20quy%20vac%20xin&accountName=Quy%20Vac%20Xin%20Covid`,
+      );
+    }
+  };
 
   const forceStopTimer = React.useCallback(() => {
     if (timerRef.current) {
@@ -44,6 +63,7 @@ export const PaymentScreen = ({route}: any) => {
     }, 1000);
 
     timerRef.current = timer;
+    getQrPayment();
     return () => clearInterval(timer);
   }, []);
 
@@ -70,8 +90,7 @@ export const PaymentScreen = ({route}: any) => {
         {timeLeft > 0 ? (
           <Image
             source={{
-              // uri: 'https://img.vietqr.io/image/970415-113366668888-compact.png',
-              uri: `https://img.vietqr.io/image/vietinbank-113366668888-compact2.jpg?amount=${route.params?.item?.price}&addInfo=dong%20gop%20quy%20vac%20xin&accountName=Quy%20Vac%20Xin%20Covid`,
+              uri: qrData,
             }}
             style={{width: 375, height: 375}}
             resizeMode="contain"

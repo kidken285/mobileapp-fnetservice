@@ -4,6 +4,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableWithoutFeedback,
+  Platform,
 } from 'react-native';
 import {TextInput, Button, HelperText} from 'react-native-paper';
 import {MyText} from '@components';
@@ -19,9 +20,16 @@ import {
   useForm,
 } from 'react-hook-form';
 import {useApp} from '@app/AppProvider';
-import {helper} from '@app/common';
+import {device, helper} from '@app/common';
 import {MyInput} from '@app/components/input/MyInput';
 import {useUserStore} from '@app/store/userStore';
+import {loginApi} from '@app/services/api/authenApi';
+import {SERCET_TOKEN} from '@app/constants/api';
+import {TOKEN_NOTIFICATION} from '@app/constants/enumStorage';
+import {storage} from '@app/storage';
+import {getTokenNotification} from '@app/common/notification';
+import {stringMd5} from 'react-native-quick-md5';
+import {HOTFIX_TIME} from '@app/api';
 
 type Props = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
@@ -35,6 +43,7 @@ export const LoginScreen = () => {
   const {signIn} = useAuth();
   const {showLoader, hideLoader, showFlashMessage} = useApp();
   const loadUserProfile = useUserStore(s => s.loadUserProfile);
+  const setUser = useUserStore(s => s.setUser);
   const {...methods} = useForm<FormUserValues>({
     mode: 'onChange',
     defaultValues: __DEV__
@@ -57,13 +66,55 @@ export const LoginScreen = () => {
   const onSubmit: SubmitHandler<FormUserValues> = async data => {
     try {
       showLoader('Đang tải...');
-      signIn('123456');
-      await loadUserProfile();
-      hideLoader();
+      const encry_code = stringMd5(data.code.trim());
+      const fcm =
+        storage.getString(TOKEN_NOTIFICATION) ||
+        (await getTokenNotification()) ||
+        '';
+      let bodyAPI = {
+        userName: data.username,
+        passCode: encry_code,
+        token: SERCET_TOKEN,
+        ver: device.getVersion(),
+        platform: Platform.OS,
+        fcm: fcm,
+        deviceId: await device.getDeviceId(),
+        deviceName: await device.getDeviceName(),
+        modelName: device.getModelDevice(),
+        hotfix: HOTFIX_TIME,
+      };
+      const response = await loginApi(bodyAPI);
+      console.log('response', response);
+
+      // signIn('123456');
+      // await loadUserProfile();
+      // hideLoader();
       // navigation.navigate('Home');
     } catch (error) {
       hideLoader();
     } finally {
+      const tmp = {
+        accessToken:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+        tokenType: 'Bearer',
+        expiresIn: 3600,
+        refreshToken: 'some_long_refresh_token_string',
+        user: {
+          userName: 'Tuan',
+          fullName: 'NVT',
+        },
+      };
+      signIn(tmp.accessToken);
+      setUser({
+        id: 'u-1',
+        username: tmp.user.userName,
+        fullName: tmp.user.fullName,
+        phone: '0123456789',
+        gender: 'male',
+        roles: ['admin'],
+      });
+
+      hideLoader();
       showFlashMessage('top', {
         message: 'Thành công',
         description: 'Đăng nhập thành công',
