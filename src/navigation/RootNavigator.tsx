@@ -34,7 +34,7 @@ export const RootNavigator = () => {
       if (domain === 1) {
         _domain = 'https://fnet.supportonline.me';
       } else if (domain == 2) {
-        _domain = 'https://fnet-wifi.supportonline.me';
+        _domain = 'https://fnet-wifi.supportonline.me:9595';
       }
       storage.set('domain', _domain);
     };
